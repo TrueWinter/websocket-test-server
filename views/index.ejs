@@ -1,0 +1,16 @@
+<%- include('includes/head.ejs', { title: 'WebSocket Routes', active: 'index' }) %>
+
+<table class="table table-fluid">
+	<tr>
+		<th>Route</th>
+		<th>Enter</th>
+	</tr>
+	<% for (var i = 0; i < routes.length; i++) { %>
+		<tr>
+			<td><%= routes[i] %></td>
+			<td><a href="/routes<%= routes[i] %>" class="btn btn-success">Enter</a></a></td>
+		</tr>
+	<% } %>
+</table>
+
+<%- include('includes/foot.ejs') %>

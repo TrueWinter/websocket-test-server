@@ -1,0 +1,11 @@
+{
+	"ws": {
+		"routes": [
+			"/eventsub"
+		],
+		"customRouteHandler": ""
+	},
+	"dashboard": {
+		"port": 8080
+	}
+}

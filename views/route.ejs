@@ -1,0 +1,99 @@
+<%- include('includes/head.ejs', { title: 'Route', active: 'index' }) %>
+
+<div class="heading-with-badge">
+	<h1>Route: <%= route %></h1>
+	<% if (buttons.length !== 0) { %>
+		<div class="badge badge-info">API Registered</div>
+	<% } %>
+</div>
+
+<div id="message-box" class="input-group mb-3">
+	<input id="message" type="text" class="form-control" autocomplete="off">
+	<div class="input-group-append">
+		<button id="send-message-button" type="button" class="btn btn-success">Send</button>
+	</div>
+</div>
+<% if (buttons.length !== 0) { %>
+	<hr>
+	<% for (var i = 0; i < buttons.length; i++) { %>
+		<button type="button" class="btn btn-info custom-button" data-id="<%= buttons[i] %>"><%= buttons[i] %></button>
+	<% } %>
+<% } %>
+<hr>
+<div>Messages will only show below if there are connected clients.</div>
+<hr>
+<div id="messages"></div>
+
+<script>
+	const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/_internal/routes<%= route %>`;
+	const ws = new WebSocket(wsUrl);
+	ws.onmessage = (data) => {
+		let d = JSON.parse(data.data);
+
+		let div = document.createElement('div');
+		div.className = 'message';
+
+		let time = document.createElement('span');
+		time.className = 'message-time';
+		time.innerText = new Date().toISOString();
+
+		let direction = document.createElement('span');
+		direction.className = 'message-direction';
+		direction.innerText = d.meta.direction.toUpperCase();
+
+		let ip = document.createElement('span');
+		ip.className = 'message-ip';
+		ip.innerText = d.meta.ip.replace(/^::ffff:/, '')
+
+		let message = document.createElement('code');
+		message.class = 'message-message';
+		message.innerText = d.data;
+		
+		div.appendChild(time);
+		div.appendChild(direction);
+		div.appendChild(ip);
+		div.appendChild(message);
+
+		document.getElementById('messages').prepend(div);
+	};
+
+	function sendMessage() {
+		let msg = document.getElementById('message');
+
+		ws.send(JSON.stringify({
+			meta: {
+				type: 'echo',
+				direction: 'out'
+			},
+			data: msg.value
+		}));
+
+		msg.value = '';
+	}
+
+	document.getElementById('send-message-button').addEventListener('click', () => {
+		sendMessage();
+	});
+
+	document.getElementById('message').addEventListener('keyup', (e) => {
+		if (e.key === 'Enter') {
+			sendMessage();
+		}
+	})
+
+	let buttons = document.getElementsByClassName('custom-button');
+	for (var i = 0; i < buttons.length; i++) {
+		buttons[i].addEventListener('click', (t) => {
+			ws.send(JSON.stringify({
+				meta: {
+					type: 'button-click'
+				},
+				data: {
+					id: t.target.dataset.id
+				}
+			}));
+		});
+	}
+</script>
+
+<%- include('includes/foot.ejs') %>
