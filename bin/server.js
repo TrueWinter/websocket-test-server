@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
 const fs = require('fs');
@@ -35,7 +37,7 @@ function run(args) {
 	}
 
 	if (!path.isAbsolute(configFile)) {
-		configFile = path.join(__dirname, configFile);
+		configFile = path.join(process.cwd(), configFile);
 	}
 
 	process.env.CONFIG_FILE = configFile;
