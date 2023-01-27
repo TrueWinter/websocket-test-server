@@ -23,7 +23,11 @@ const wsRouteClientActivityMap = new Map();
 const api = new API();
 if (config.ws.customRouteHandler) {
 	try {
-		require(path.join(path.dirname(process.env.CONFIG_FILE), config.ws.customRouteHandler))(api);
+		if (config.ws.customRouteHandler.startsWith('./')) {
+			require(path.join(path.dirname(process.env.CONFIG_FILE), config.ws.customRouteHandler))(api);
+		} else {
+			require(config.ws.customRouteHandler)(api);
+		}
 	} catch (err) {
 		console.error('Failed to load custom route handler', err);
 	}
