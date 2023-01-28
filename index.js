@@ -226,7 +226,7 @@ app.get('/routes/:route*', (req, res) => {
 	res.render('route', {
 		route: route,
 		buttons: api.hasRoute(route) ? api.getDashboardButtons(route) : [],
-		apiRegistered: !api._hasRouteCallback(route)
+		apiRegistered: api._hasRouteCallback(route)
 	});
 });
 

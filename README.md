@@ -10,7 +10,7 @@ npm install --global websocket-test-server
 
 ## Usage
 
-To use WebSocket-Test-Server, create a config file and then run `websocket-test-server` from the command line.
+To use WebSocket-Test-Server, create a config file and then run `websocket-test-server` from the command line. The path to the config file must be absolute.
 
 ```json
 {
@@ -34,7 +34,7 @@ websocket-test-server --config /path/to/config.json
 
 The routes registered in the config file cannot be automated using code. All data sent to the clients must be done manually though the dashboard.
 
-You can register routes programatically by setting the `customRouteHandler` config option to the path of a file using the WebSocket-Test-Server API.
+You can register routes programatically by setting the `customRouteHandler` config option to the path of a file using the WebSocket-Test-Server API. The path can be either relative to the directory containing the config file, or absolute.
 
 ```js
 module.exports = (api) => {

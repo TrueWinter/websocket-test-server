@@ -1,6 +1,6 @@
 {
   "name": "websocket-test-server",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Allows you to run a WebSocket server from the command line to aid in developing WebSocket-based websites",
   "main": "index.js",
   "scripts": {
