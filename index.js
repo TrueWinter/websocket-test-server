@@ -72,10 +72,10 @@ wss.on('connection', (ws, req) => {
 
 	let route = req.url;
 	if (!wsRouteClientMap.has(route)) {
-		wsRouteClientMap.set(route, new Set());
+		wsRouteClientMap.set(route, new Map());
 	}
 
-	wsRouteClientMap.get(route).add({
+	wsRouteClientMap.get(route).set(ip, {
 		ws,
 		ip
 	});
@@ -100,12 +100,16 @@ wss.on('connection', (ws, req) => {
 		handleDashEchoMessage(route, data, 'in', ip);
 	});
 
-	setInterval(() => {
+	var wsInterval = setInterval(() => {
 		ws.ping();
 
-		if (Date.now() - wsRouteClientActivityMap.get(ip) > 60 * 1000) {
+		if (!wsRouteClientActivityMap.get(ip) || Date.now() - wsRouteClientActivityMap.get(ip) > 60 * 1000) {
 			console.log(`Closed WebSocket connection from ${ip} due to inactivity.`);
 			ws.terminate();
+			clearInterval(wsInterval);
+			
+			if (!wsRouteClientMap.has(route)) return;
+			wsRouteClientMap.get(route).delete(ip);
 			wsRouteClientActivityMap.delete(ip);
 		}
 	}, 30 * 1000).unref();
@@ -116,10 +120,7 @@ wss.on('connection', (ws, req) => {
 
 	ws.on('close', () => {
 		if (!wsRouteClientMap.has(route)) return;
-		wsRouteClientMap.get(route).delete({
-			ws,
-			ip
-		});
+		wsRouteClientMap.get(route).delete(ip);
 		wsRouteClientActivityMap.delete(ip);
 	});
 });
@@ -146,18 +147,18 @@ dashWss.on('connection', (ws, req) => {
 			case 'echo':
 				if (d.meta.direction !== 'out') break;
 				if (!wsRouteClientMap.has(route)) return;
-				wsRouteClientMap.get(route).forEach((ws2) => {
-					ws2.ws.send(d.data);
-					handleDashEchoMessage(route, d.data, 'out', ws2.ip);
+				wsRouteClientMap.get(route).forEach((v) => {
+					v.ws.send(d.data);
+					handleDashEchoMessage(route, d.data, 'out', v.ip);
 				});
 				break;
 			case 'button-click':
 				if (!api.hasDashboardButton(`${route}`, d.data.id)) break;
 				api._getDashboardButtonCallback(`${route}`, d.data.id)((data) => {
 					if (!wsRouteClientMap.has(route)) return;
-					wsRouteClientMap.get(route).forEach((ws2) => {
-						ws2.ws.send(data);
-						handleDashEchoMessage(route, data, 'out', ws2.ip);
+					wsRouteClientMap.get(route).forEach((v) => {
+						v.ws.send(data);
+						handleDashEchoMessage(route, data, 'out', v.ip);
 					});
 				});
 				break;
